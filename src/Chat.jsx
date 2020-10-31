@@ -1,5 +1,5 @@
 import React from 'react';
-import {ApolloClient, InMemoryCache, ApolloProvider, useQuery, gql} from '@apollo/client';
+import {ApolloClient, InMemoryCache, ApolloProvider, useQuery, gql, useMutation} from '@apollo/client';
 
 import {
     Container,
@@ -23,6 +23,12 @@ const GET_MESSAGES = gql`
         }
     }
 `;
+
+const POST_MESSAGE = gql`
+mutation ($user:String!, $content:String!){
+  postMessage(user: $user, content: $content)
+}
+`
 
 
 const Messages = ({user}) => {
@@ -77,7 +83,19 @@ const Messages = ({user}) => {
                     content: ''
                 })
 
+                const [postMessage] = useMutation(POST_MESSAGE);
 
+                const onSend = () => {
+                    if (state.content.length > 0){
+                        postMessage({
+                            variables:state
+                        })
+                    }
+                    stateSet({
+                        ... state,
+                        content: '',
+                    })
+                }
                 return (
                 <Container>
                 <Messages user={state.user}/>
@@ -95,7 +113,7 @@ const Messages = ({user}) => {
                         <Col xs ={8} >
                             <FormInput
                                 label = "Content"
-                                value = {state.user}
+                                value = {state.content}
                                 onChange ={(evt) => stateSet({
                                     ... state,
                                     content: evt.target.value,
